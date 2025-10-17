@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -93,6 +92,13 @@ app.post('/api/batch-convert', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✓ 服务运行在 http://localhost:${PORT}`);
-});
+// 本地开发时启动服务器
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`✓ 服务运行在 http://localhost:${PORT}`);
+  });
+}
+
+// 导出给 Vercel Serverless
+module.exports = app;
