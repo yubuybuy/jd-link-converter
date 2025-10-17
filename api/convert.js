@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+export default async function handler(req, res) {
   // 设置 CORS 和 Content-Type
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -55,4 +55,4 @@ module.exports = (req, res) => {
     console.error('转换失败:', error);
     res.status(500).json({ error: '转换失败: ' + error.message });
   }
-};
+}
