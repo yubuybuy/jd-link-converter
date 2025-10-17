@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>京东领券链接转换工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .feature-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-list h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .feature-list ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            color: #555;
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e1e8ed;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: monospace;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .link-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+
+        .link-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .link-text {
+            color: #667eea;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 10px;
+            background: #667eea;
+        }
+
+        .success {
+            color: #27ae60;
+            background: #d5f4e6;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success.show {
+            display: block;
+        }
+
+        .error {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .batch-result {
+            margin-top: 10px;
+        }
+
+        .batch-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .batch-item.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .batch-item.failed {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .example {
+            background: #fff9e6;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .example h4 {
+            color: #f39c12;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .example code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 12px;
+            word-break: break-all;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 京东领券链接转换</h1>
+        <p class="subtitle">去除推广参数，一键点亮领券按钮</p>
+
+        <div class="feature-list">
+            <h3>功能特点：</h3>
+            <ul>
+                <li>自动去除所有推广参数（utm_*, gxd, gx, rid等）</li>
+                <li>转换为纯净的领券链接，点击即可领取</li>
+                <li>支持单个链接转换和批量转换</li>
+                <li>一键复制转换后的链接</li>
+            </ul>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('single')">单个转换</div>
+            <div class="tab" onclick="switchTab('batch')">批量转换</div>
+        </div>
+
+        <!-- 单个转换 -->
+        <div id="single-tab" class="tab-content active">
+            <form id="singleForm">
+                <div class="form-group">
+                    <label for="singleUrl">京东推广链接</label>
+                    <input type="text" id="singleUrl" placeholder="粘贴京东推广链接..." required>
+                </div>
+                <button type="submit">🔄 立即转换</button>
+            </form>
+
+            <div class="example">
+                <h4>示例：</h4>
+                <strong>原始推广链接：</strong>
+                <code>https://pro.m.jd.com/mall/active/4DMKncedT4nRR9RnEdwf9xmXhRRC/index.html?utm_user=plusmember&...</code>
+                <strong style="margin-top: 10px; display: block;">转换后纯净链接：</strong>
+                <code>https://h5static.m.jd.com/mall/active/4DMKncedT4nRR9RnEdwf9xmXhRRC/index.html?_ts=dc_1760634385862</code>
+            </div>
+
+            <div class="error" id="singleError"></div>
+            <div class="success" id="singleSuccess"></div>
+
+            <div class="result" id="singleResult">
+                <h3>✨ 转换成功</h3>
+                <div class="link-box">
+                    <div class="link-label">原始链接：</div>
+                    <div class="link-text" id="originalLink"></div>
+                </div>
+                <div class="link-box">
+                    <div class="link-label">转换后链接：</div>
+                    <div class="link-text" id="convertedLink"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('convertedLink')">📋 复制链接</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 批量转换 -->
+        <div id="batch-tab" class="tab-content">
+            <form id="batchForm">
+                <div class="form-group">
+                    <label for="batchUrls">京东推广链接（每行一个）</label>
+                    <textarea id="batchUrls" placeholder="粘贴多个京东推广链接，每行一个..." required></textarea>
+                </div>
+                <button type="submit">🔄 批量转换</button>
+            </form>
+
+            <div class="error" id="batchError"></div>
+
+            <div class="result" id="batchResult">
+                <h3>✨ 批量转换完成</h3>
+                <div id="batchResultList"></div>
+                <button class="copy-btn" onclick="copyAllConverted()">📋 复制所有转换后的链接</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // 切换标签样式
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        // 单个转换
+        document.getElementById('singleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const url = document.getElementById('singleUrl').value;
+            const errorDiv = document.getElementById('singleError');
+            const successDiv = document.getElementById('singleSuccess');
+            const resultDiv = document.getElementById('singleResult');
+
+            // 重置状态
+            errorDiv.classList.remove('show');
+            successDiv.classList.remove('show');
+            resultDiv.classList.remove('show');
+
+            try {
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('originalLink').textContent = result.original;
+                    document.getElementById('convertedLink').textContent = result.converted;
+                    resultDiv.classList.add('show');
+                    successDiv.textContent = '✓ 转换成功！点击下方按钮复制链接';
+                    successDiv.classList.add('show');
+                } else {
+                    errorDiv.textContent = '✗ ' + result.error;
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                errorDiv.textContent = '✗ 转换失败: ' + error.message;
+                errorDiv.classList.add('show');
+            }
+        });
+
+        // 批量转换
+        document.getElementById('batchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const urlsText = document.getElementById('batchUrls').value;
+            const urls = urlsText.split('\n').filter(line => line.trim());
+            const errorDiv = document.getElementById('batchError');
+            const resultDiv = document.getElementById('batchResult');
+            const resultList = document.getElementById('batchResultList');
+
+            // 重置状态
+            errorDiv.classList.remove('show');
+            resultDiv.classList.remove('show');
+            resultList.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/batch-convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ urls })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    result.results.forEach((item, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'batch-item ' + (item.success ? 'success' : 'failed');
+                        div.innerHTML = `
+                            <div style="font-size: 12px; color: #999; margin-bottom: 5px;">链接 ${index + 1}</div>
+                            <div style="font-family: monospace; font-size: 12px; color: #667eea; word-break: break-all;">
+                                ${item.success ? item.converted : item.error}
+                            </div>
+                        `;
+                        resultList.appendChild(div);
+                    });
+                    resultDiv.classList.add('show');
+                } else {
+                    errorDiv.textContent = '✗ ' + result.error;
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                errorDiv.textContent = '✗ 批量转换失败: ' + error.message;
+                errorDiv.classList.add('show');
+            }
+        });
+
+        // 复制到剪贴板
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✓ 已复制到剪贴板');
+            }).catch(err => {
+                alert('✗ 复制失败: ' + err);
+            });
+        }
+
+        // 复制所有转换后的链接
+        function copyAllConverted() {
+            const items = document.querySelectorAll('#batchResultList .batch-item.success');
+            const links = Array.from(items).map(item => {
+                return item.querySelector('div:last-child').textContent.trim();
+            });
+
+            const text = links.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✓ 已复制 ' + links.length + ' 个链接到剪贴板');
+            }).catch(err => {
+                alert('✗ 复制失败: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>

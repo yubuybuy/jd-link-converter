@@ -1,0 +1,16 @@
+{
+  "name": "jd-link-converter",
+  "version": "1.0.0",
+  "description": "京东领券链接转换工具 - 去除推广参数，一键点亮领券按钮",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": ["jd", "coupon", "link", "converter"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
