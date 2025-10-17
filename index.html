@@ -247,29 +247,22 @@
             border-left: 4px solid #e74c3c;
         }
 
-        .example {
-            background: #fff9e6;
-            border-left: 4px solid #f39c12;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 4px;
-        }
-
-        .example h4 {
-            color: #f39c12;
-            margin-bottom: 10px;
+        .clear-btn {
+            width: auto;
+            padding: 8px 16px;
             font-size: 14px;
+            margin-top: 10px;
+            background: #e74c3c;
         }
 
-        .example code {
-            display: block;
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 5px;
-            font-size: 12px;
-            word-break: break-all;
-            color: #666;
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
         }
     </style>
 </head>
@@ -300,16 +293,11 @@
                     <label for="singleUrl">京东推广链接</label>
                     <input type="text" id="singleUrl" placeholder="粘贴京东推广链接..." required>
                 </div>
-                <button type="submit">🔄 立即转换</button>
+                <div class="button-group">
+                    <button type="submit">🔄 立即转换</button>
+                    <button type="button" class="clear-btn" onclick="clearSingleInput()">🗑️ 清空</button>
+                </div>
             </form>
-
-            <div class="example">
-                <h4>示例：</h4>
-                <strong>原始推广链接：</strong>
-                <code>https://pro.m.jd.com/mall/active/4DMKncedT4nRR9RnEdwf9xmXhRRC/index.html?utm_user=plusmember&...</code>
-                <strong style="margin-top: 10px; display: block;">转换后纯净链接：</strong>
-                <code>https://h5static.m.jd.com/mall/active/4DMKncedT4nRR9RnEdwf9xmXhRRC/index.html?_ts=dc_1760634385862</code>
-            </div>
 
             <div class="error" id="singleError"></div>
             <div class="success" id="singleSuccess"></div>
@@ -335,7 +323,10 @@
                     <label for="batchUrls">京东推广链接（每行一个）</label>
                     <textarea id="batchUrls" placeholder="粘贴多个京东推广链接，每行一个..." required></textarea>
                 </div>
-                <button type="submit">🔄 批量转换</button>
+                <div class="button-group">
+                    <button type="submit">🔄 批量转换</button>
+                    <button type="button" class="clear-btn" onclick="clearBatchInput()">🗑️ 清空</button>
+                </div>
             </form>
 
             <div class="error" id="batchError"></div>
@@ -444,14 +435,69 @@
             }
         });
 
-        // 复制到剪贴板
+        // 清空单个输入框
+        function clearSingleInput() {
+            document.getElementById('singleUrl').value = '';
+            document.getElementById('singleError').classList.remove('show');
+            document.getElementById('singleSuccess').classList.remove('show');
+            document.getElementById('singleResult').classList.remove('show');
+        }
+
+        // 清空批量输入框
+        function clearBatchInput() {
+            document.getElementById('batchUrls').value = '';
+            document.getElementById('batchError').classList.remove('show');
+            document.getElementById('batchResult').classList.remove('show');
+        }
+
+        // 复制到剪贴板 - 兼容移动端
         function copyToClipboard(elementId) {
             const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✓ 已复制到剪贴板');
-            }).catch(err => {
+
+            // 方法1: 使用现代 Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✓ 已复制到剪贴板');
+                }).catch(err => {
+                    // 失败时使用备用方法
+                    fallbackCopy(text);
+                });
+            } else {
+                // 方法2: 使用传统方法（兼容旧浏览器和 HTTP）
+                fallbackCopy(text);
+            }
+        }
+
+        // 备用复制方法 - 兼容所有设备
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('✓ 已复制到剪贴板');
+                } else {
+                    alert('✗ 复制失败，请手动复制');
+                }
+            } catch (err) {
                 alert('✗ 复制失败: ' + err);
-            });
+            }
+
+            document.body.removeChild(textarea);
         }
 
         // 复制所有转换后的链接
@@ -462,11 +508,16 @@
             });
 
             const text = links.join('\n');
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✓ 已复制 ' + links.length + ' 个链接到剪贴板');
-            }).catch(err => {
-                alert('✗ 复制失败: ' + err);
-            });
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✓ 已复制 ' + links.length + ' 个链接到剪贴板');
+                }).catch(err => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
         }
     </script>
 </body>
